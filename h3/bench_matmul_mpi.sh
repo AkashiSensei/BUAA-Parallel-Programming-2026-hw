@@ -6,9 +6,9 @@
 #   ./bench_matmul_mpi.sh <rep> --fresh
 #
 # 默认只写入 results/matmul_bench.csv（总时间 time_sec）。
-# 分析实验时可设置:
-#   MATMUL_PROFILE=1 ./bench_matmul_mpi.sh 1   # 额外写 matmul_bench_profile.csv 等
-#   MATMUL_EVENTS=1  ./bench_matmul_mpi.sh 1   # 再写 matmul_bench_events.csv
+# 时间线实验请用 bench_matmul_timeline.sh（不写本 CSV）。
+#
+# 可选: MATMUL_PROFILE=1  额外在 stdout 输出 PROFILE/RANK（并捕获到 profile CSV）
 #
 # 相邻两次 mpirun 之间固定等待 10 秒。
 
@@ -22,16 +22,11 @@ EXE="$DIR/matmul_mpi"
 OUT="$DIR/results/matmul_bench.csv"
 OUT_PROFILE="$DIR/results/matmul_bench_profile.csv"
 OUT_RANK="$DIR/results/matmul_bench_rank_profile.csv"
-OUT_EVENTS="$DIR/results/matmul_bench_events.csv"
 MATMUL_N=8000
 PROCS="64 32 16 8 4 2 1"
 
 WANT_PROFILE=0
-WANT_EVENTS=0
-if [[ "${MATMUL_EVENTS:-0}" == "1" ]]; then
-  WANT_EVENTS=1
-  WANT_PROFILE=1
-elif [[ "${MATMUL_PROFILE:-0}" == "1" ]]; then
+if [[ "${MATMUL_PROFILE:-0}" == "1" ]]; then
   WANT_PROFILE=1
 fi
 
@@ -60,8 +55,7 @@ mkdir -p "$(dirname "$OUT")"
 if [[ "$FRESH" -eq 1 ]]; then
   rm -f "$OUT"
   [[ "$WANT_PROFILE" -eq 1 ]] && rm -f "$OUT_PROFILE" "$OUT_RANK"
-  [[ "$WANT_EVENTS" -eq 1 ]] && rm -f "$OUT_EVENTS"
-  echo "已删除旧结果（按本次 profiling 开关）" >&2
+  echo "已删除旧结果: $OUT" >&2
 fi
 if [[ ! -f "$OUT" ]] || [[ ! -s "$OUT" ]]; then
   echo "N,p,Pr,Pc,rep,time_sec" >"$OUT"
@@ -75,9 +69,6 @@ fi
 if [[ "$WANT_PROFILE" -eq 1 ]] && [[ ! -f "$OUT_PROFILE" ]]; then
   echo "N,p,Pr,Pc,rep,time_sec,scatter_a_sec,scatter_b_sec,k_comm_sec,k_gemm_sec,gather_sec,other_sec" >"$OUT_PROFILE"
   echo "N,p,Pr,Pc,rep,rank,scatter_a_sec,scatter_b_sec,k_comm_sec,k_gemm_sec,gather_sec" >"$OUT_RANK"
-fi
-if [[ "$WANT_EVENTS" -eq 1 ]] && [[ ! -f "$OUT_EVENTS" ]]; then
-  echo "N,p,Pr,Pc,rep,rank,seq,t_start,t_end,phase,kind,k,peer,tag,dur_sec" >"$OUT_EVENTS"
 fi
 
 wall_start=$(date +%s)
@@ -119,10 +110,6 @@ for p in $PROCS; do
         [[ -z "$rk" ]] && continue
         echo "$n_out,$p_out,$pr_out,$pc_out,$REP,$rk,$sa,$sb,$kc,$kg,$tg" >>"$OUT_RANK"
       done < <(printf '%s\n' "$mpi_out" | grep '^RANK ')
-    fi
-    if [[ "$WANT_EVENTS" -eq 1 ]]; then
-      printf '%s\n' "$mpi_out" | awk -v n="$n_out" -v p="$p_out" -v pr="$pr_out" -v pc="$pc_out" -v rep="$REP" \
-        '/^EVENT /{printf "%s,%s,%s,%s,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.9f\n",n,p,pr,pc,rep,$2,$3,$4,$5,$6,$7,$8,$9,$10,$5-$4}' >>"$OUT_EVENTS"
     fi
   fi
 

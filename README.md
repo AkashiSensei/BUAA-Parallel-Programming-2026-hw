@@ -50,3 +50,31 @@ h2/
 └── results/
     └── pqs_bench.csv              # 基准原始数据（CSV）
 ```
+
+---
+
+## Assignment 3（h3）：MPI 二维块划分矩阵乘法
+
+使用 **MPI** 实现 \(N\times N\) 双精度方阵乘法的二维块划分，按进程数考察强扩展；配套脚本完成五轮基准、可选事件时间线记录，并用 Python 绘制耗时、加速比与各 rank Gantt 图。编译与运行见 [h3/README.md](h3/README.md)。
+
+```
+h3/
+├── 并行程序设计A_h3.pdf             # 课程作业报告
+├── Exercise-3.pdf                 # 实验说明 PDF
+├── matmul_mpi.c                   # MPI 块矩阵乘法主程序
+├── Makefile                       # mpicc -O3 编译
+├── bench_matmul_mpi.sh            # 五轮基准脚本
+├── bench_matmul_timeline.sh       # 时间线实验脚本
+├── plot_matmul_bench.py           # 绘制耗时 / 加速比
+├── plot_timeline.py               # 绘制各 p 的 rank 时间线
+├── analyze_timeline.py            # 可选：终端打印事件时间线
+├── README.md                      # 编译、运行与环境变量说明
+├── plots/
+│   ├── matmul_time_vs_procs.png
+│   ├── matmul_speedup_vs_procs.png
+│   └── timeline_p{1,2,4,8,16,32,64}.png
+└── results/
+    ├── matmul_bench.csv
+    ├── matmul_bench_timeline.csv
+    └── events/
+```

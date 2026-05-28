@@ -5,15 +5,19 @@
  * 默认输出一行: N p Pr Pc time_sec
  *
  * 可选环境变量（用于单独的分析实验）:
- *   MATMUL_PROFILE=1  额外输出 PROFILE / RANK 阶段汇总
- *   MATMUL_EVENTS=1   再输出 EVENT 时间线（隐含开启记录）
+ *   MATMUL_PROFILE=1       stdout 输出 PROFILE / RANK 阶段汇总
+ *   MATMUL_EVENTS=1        各 rank 写入 results/events/ 下独立 CSV
+ *   MATMUL_REP=<n>         事件文件名中的重复编号（默认 1）
+ *   MATMUL_EVENTS_DIR=...  事件目录（默认 results/events）
  */
 
 #include <mpi.h>
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define TAG_A 100
 #define TAG_B 200
@@ -32,30 +36,90 @@ typedef struct {
 } ProfEvent;
 
 static struct {
-  int summary;
-  int events;
+  int summary_out;
+  int events_out;
   double origin;
   int next_seq;
   int count;
   ProfEvent ev[PROF_MAX_EVENTS];
 } g_prof = {0, 0, 0.0, 0, 0, {{0}}};
 
+#define EVENTS_DIR_DEFAULT "results/events"
+
 static int env_enabled(const char *name) {
   const char *v = getenv(name);
   return v != NULL && v[0] != '\0' && v[0] != '0';
 }
 
+static int prof_should_record(void) {
+  return g_prof.events_out || g_prof.summary_out;
+}
+
 static void prof_init(double origin) {
-  g_prof.events = env_enabled("MATMUL_EVENTS");
-  g_prof.summary = g_prof.events || env_enabled("MATMUL_PROFILE");
+  g_prof.events_out = env_enabled("MATMUL_EVENTS");
+  g_prof.summary_out = env_enabled("MATMUL_PROFILE");
   g_prof.origin = origin;
   g_prof.next_seq = 0;
   g_prof.count = 0;
 }
 
+static int prof_rep_from_env(void) {
+  const char *v = getenv("MATMUL_REP");
+  if (v == NULL || v[0] == '\0') {
+    return 1;
+  }
+  char *end = NULL;
+  long r = strtol(v, &end, 10);
+  if (end == v || *end != '\0' || r < 1 || r > 100000) {
+    return 1;
+  }
+  return (int)r;
+}
+
+static const char *prof_events_dir(void) {
+  const char *d = getenv("MATMUL_EVENTS_DIR");
+  if (d != NULL && d[0] != '\0') {
+    return d;
+  }
+  return EVENTS_DIR_DEFAULT;
+}
+
+static void prof_ensure_events_dir(const char *dir) {
+  if (mkdir("results", 0755) != 0 && errno != EEXIST) {
+    fprintf(stderr, "mkdir(results): %s\n", strerror(errno));
+  }
+  if (mkdir(dir, 0755) != 0 && errno != EEXIST) {
+    fprintf(stderr, "mkdir(%s): %s\n", dir, strerror(errno));
+  }
+}
+
+static void prof_write_rank_csv(int rank, int n, int p, int pr, int pc, int rep) {
+  if (!g_prof.events_out) {
+    return;
+  }
+  const char *dir = prof_events_dir();
+  char path[512];
+  snprintf(path, sizeof(path), "%s/N%d_p%d_rep%d_rank%03d.csv", dir, n, p, rep, rank);
+
+  FILE *fp = fopen(path, "w");
+  if (fp == NULL) {
+    fprintf(stderr, "rank %d: cannot write %s: %s\n", rank, path, strerror(errno));
+    return;
+  }
+  fprintf(fp, "N,p,Pr,Pc,rep,rank,seq,t_start,t_end,phase,kind,k,peer,tag,dur_sec\n");
+  for (int i = 0; i < g_prof.count; i++) {
+    const ProfEvent *e = &g_prof.ev[i];
+    const double dur = e->t1 - e->t0;
+    fprintf(fp, "%d,%d,%d,%d,%d,%d,%d,%.9f,%.9f,%s,%s,%d,%d,%d,%.9f\n", n, p, pr, pc,
+            rep, rank, e->seq, e->t0, e->t1, e->phase, e->kind, e->k, e->peer, e->tag,
+            dur);
+  }
+  fclose(fp);
+}
+
 static void prof_record(const char *phase, const char *kind, int k, int peer, int tag,
                         double t_start, double t_end) {
-  if (!g_prof.summary || g_prof.count >= PROF_MAX_EVENTS) {
+  if (!prof_should_record() || g_prof.count >= PROF_MAX_EVENTS) {
     return;
   }
   ProfEvent *e = &g_prof.ev[g_prof.count++];
@@ -67,17 +131,6 @@ static void prof_record(const char *phase, const char *kind, int k, int peer, in
   e->k = k;
   e->peer = peer;
   e->tag = tag;
-}
-
-static void prof_emit_all(int rank) {
-  if (!g_prof.events) {
-    return;
-  }
-  for (int i = 0; i < g_prof.count; i++) {
-    const ProfEvent *e = &g_prof.ev[i];
-    printf("EVENT %d %d %.9f %.9f %s %s %d %d %d\n", rank, e->seq, e->t0, e->t1,
-           e->phase, e->kind, e->k, e->peer, e->tag);
-  }
 }
 
 static void block_bounds(int n, int blocks, int idx, int *start, int *end) {
@@ -525,7 +578,7 @@ int main(int argc, char **argv) {
     printf("%d %d %d %d %.9f\n", n, p, Pr, Pc, elapsed);
   }
 
-  if (g_prof.summary) {
+  if (g_prof.summary_out) {
     double t_scatter_a = 0, t_scatter_b = 0, t_k_comm = 0, t_k_gemm = 0, t_gather = 0,
            t_other = 0;
     sum_phase_times(&t_scatter_a, &t_scatter_b, &t_k_comm, &t_k_gemm, &t_gather, &t_other);
@@ -533,10 +586,6 @@ int main(int argc, char **argv) {
     if (t_other < 0.0) {
       t_other = 0.0;
     }
-
-    int local_nev = g_prof.count;
-    int total_nev = 0;
-    MPI_Reduce(&local_nev, &total_nev, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
     const int nprof = 6;
     double local_prof[6];
@@ -570,17 +619,24 @@ int main(int argc, char **argv) {
       }
       free(all_prof);
     }
+  }
 
-    if (g_prof.events) {
-      MPI_Barrier(MPI_COMM_WORLD);
+  if (g_prof.events_out) {
+    const int rep = prof_rep_from_env();
+    const char *dir = prof_events_dir();
+    if (rank == 0) {
+      prof_ensure_events_dir(dir);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    prof_write_rank_csv(rank, n, p, Pr, Pc, rep);
+    MPI_Barrier(MPI_COMM_WORLD);
+    {
+      const int local_nev = g_prof.count;
+      int total_nev = 0;
+      MPI_Reduce(&local_nev, &total_nev, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank == 0) {
-        printf("EVENTS_BEGIN %d\n", total_nev);
-      }
-      MPI_Barrier(MPI_COMM_WORLD);
-      prof_emit_all(rank);
-      MPI_Barrier(MPI_COMM_WORLD);
-      if (rank == 0) {
-        printf("EVENTS_END\n");
+        printf("EVENTS_DIR %s N %d p %d rep %d total_events %d\n", dir, n, p, rep,
+               total_nev);
       }
     }
   }
