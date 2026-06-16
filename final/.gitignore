@@ -1,0 +1,14 @@
+# 预生成的矩阵二进制数据（含 N{N}_cref.bin）
+data/N*.bin
+
+# 编译产物（make all / data 工具）
+**/bench
+**/verify_gemm
+data/gen_data
+data/gen_cref
+*.o
+*.a
+*.so
+*.cubin
+*.fatbin
+*.ptx

