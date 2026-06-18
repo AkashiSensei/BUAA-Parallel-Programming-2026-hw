@@ -12,6 +12,9 @@ endif
 
 IMPL_NAME ?= $(notdir $(patsubst %/,%,$(CURDIR)))
 
+# 线程块边长（BLOCK×BLOCK）；朴素实现默认 16，共享内存等实现可在 include 前设为 32。
+BLOCK ?= 16
+
 NVCCFLAGS = -O3 -std=c++11 -Xcompiler -Wall,-Wextra
 INCLUDES = -I$(UTIL_DIR) -I.
 UTIL_BENCH = $(UTIL_DIR)/bench.cu
@@ -68,29 +71,31 @@ run: $(BENCH)
 ifndef N
 	$(error 请指定矩阵规模，例如: make run N=1024)
 endif
-	CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) ./$(BENCH) -n $(N) --data-dir $(DATA_DIR)
+	CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) ./$(BENCH) -n $(N) --data-dir $(DATA_DIR) --block $(BLOCK)
 
 check: $(VERIFY_BIN)
 ifndef N
 	$(error 请指定矩阵规模，例如: make check N=1024)
 endif
-	CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) ./$(VERIFY_BIN) -n $(N) --data-dir $(DATA_DIR)
+	CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) ./$(VERIFY_BIN) -n $(N) --data-dir $(DATA_DIR) --block $(BLOCK)
 
 check-all: $(VERIFY_BIN)
 	@for n in $(SIZES); do \
-		CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) ./$(VERIFY_BIN) -n $$n --data-dir $(DATA_DIR) || exit 1; \
+		CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) ./$(VERIFY_BIN) -n $$n --data-dir $(DATA_DIR) --block $(BLOCK) || exit 1; \
 	done
 
 bench-run: $(BENCH)
 	GEMM_DIR=$(CURDIR) IMPL_NAME=$(IMPL_NAME) DATA_DIR=$(DATA_DIR) \
-		RESULTS_DIR=$(RESULTS_DIR) CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) bash $(UTIL_DIR)/bench.sh
+		RESULTS_DIR=$(RESULTS_DIR) CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) BLOCK=$(BLOCK) \
+		bash $(UTIL_DIR)/bench.sh
 
 define ncu-target
 ncu-$(1): $(BENCH)
 	@mkdir -p $(NCU_DIR)
 	CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) $(NCU) $(NCU_ARGS) --force-overwrite \
 		-o $(NCU_DIR)/$(IMPL_NAME)_N$(1) \
-		./$(BENCH) -n $(1) --data-dir $(DATA_DIR) --impl $(IMPL_NAME) --warmup 1 --iters 1
+		./$(BENCH) -n $(1) --data-dir $(DATA_DIR) --impl $(IMPL_NAME) \
+		--block $(BLOCK) --warmup 1 --iters 1
 endef
 $(foreach n,$(PROFILING_SIZES),$(eval $(call ncu-target,$(n))))
 
@@ -102,7 +107,7 @@ nsys-$(1): $(BENCH)
 	CUDA_VISIBLE_DEVICES=$(CUDA_DEVICE) $(NSYS) $(NSYS_ARGS) \
 		-o $(PROFILING_DIR)/$(IMPL_NAME)_N$(1) \
 		./$(BENCH) -n $(1) --data-dir $(DATA_DIR) --impl $(IMPL_NAME) \
-		--warmup $(NSYS_WARMUP) --iters $(NSYS_ITERS)
+		--block $(BLOCK) --warmup $(NSYS_WARMUP) --iters $(NSYS_ITERS)
 endef
 $(foreach n,$(PROFILING_SIZES),$(eval $(call nsys-target,$(n))))
 
