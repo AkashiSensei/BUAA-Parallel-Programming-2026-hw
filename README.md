@@ -78,3 +78,48 @@ h3/
     ├── matmul_bench_timeline.csv
     └── events/
 ```
+
+---
+
+## Final（final）：CUDA GEMM 优化与性能分析
+
+围绕 **CUDA 双精度矩阵乘法（GEMM）** 完成 GPU kernel 实现、正确性校验、benchmark 与 Nsight profiling 分析。实验从一线程计算一个输出元素的朴素实现出发，对比关闭优化（`-O0`）与开启优化（`-O3`）的指令生成差异；随后实现基于 **shared memory tiled GEMM** 的版本，并加入 **cuBLAS** 作为标准库性能参照。报告中结合 Nsight Systems / Nsight Compute、Roofline、存储与缓存、调度发射、occupancy、stall reason、SASS 指令流程等信息进行横向分析。
+
+```text
+final/
+├── 并行程序设计A_Final.pdf                 # 渲染后的最终实验报告
+├── Final-2026.pdf                         # 课程 final 作业说明 PDF
+├── .gitignore                             # 忽略中间可执行文件与大规模输入矩阵数据
+├── data/                                  # 输入矩阵与 cuBLAS 参考结果生成工具
+│   ├── Makefile
+│   ├── gen_data.c                         # 生成随机 A/B 输入数据
+│   └── gen_cref.cu                        # 调用 cuBLAS 生成 C_ref
+├── util/                                  # 公共 benchmark / verify / Makefile 规则
+│   ├── bench.cu                           # cudaEvent 计时 benchmark
+│   ├── verify.cu                          # 与 C_ref 比较正确性
+│   ├── bench.sh                           # 批量 benchmark 脚本
+│   ├── gemm_common.mk                     # check / bench-run / ncu / nsys 通用目标
+│   └── *.h, *.c                           # CUDA 检查、矩阵 IO 与误差比较工具
+├── gemm_naive_O0/                         # 朴素 GEMM，关闭编译器优化
+│   ├── Makefile
+│   ├── results/                           # benchmark CSV
+│   └── profiling/                         # ncu / nsys profiling 结果
+├── gemm_naive/                            # 朴素 GEMM，默认 -O3 编译
+│   ├── Makefile
+│   ├── gemm_naive.cu
+│   ├── results/
+│   └── profiling/
+├── gemm_shared/                           # 32×32 shared memory tiled GEMM
+│   ├── Makefile
+│   ├── gemm_shared.cu
+│   ├── analysis/gemm_shared_lineinfo_sm_70.sass  # 带源码位置提示的 SASS 参考汇编
+│   ├── results/
+│   └── profiling/
+└── gemm_cublas/                           # cuBLAS 对照实现
+    ├── Makefile
+    ├── gemm_cublas.cu
+    ├── results/
+    └── profiling/
+```
+
+常用入口：先在 `final/data` 下生成所需规模的输入矩阵与参考结果；随后在各实现目录执行 `make check-all` 做正确性校验，`make bench-run` 生成 benchmark CSV，`make ncu` / `make nsys` 采集 profiling。`gemm_shared` 额外提供 `make sass-lineinfo`，用于生成带源码位置提示的 SASS 参考汇编。

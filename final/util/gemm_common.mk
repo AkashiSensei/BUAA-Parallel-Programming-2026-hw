@@ -17,6 +17,7 @@ BLOCK ?= 16
 
 NVCCFLAGS = -O3 -std=c++11 -Xcompiler -Wall,-Wextra
 INCLUDES = -I$(UTIL_DIR) -I.
+LDLIBS ?=
 UTIL_BENCH = $(UTIL_DIR)/bench.cu
 UTIL_VERIFY = $(UTIL_DIR)/verify.cu
 UTIL_IO = $(UTIL_DIR)/mat_io.c
@@ -36,8 +37,11 @@ NCU_SET ?= full
 NCU_LAUNCH_SKIP ?= 1
 NCU_LAUNCH_COUNT ?= 1
 NCU_KERNEL ?= $(IMPL_NAME)_kernel
+ifneq ($(strip $(NCU_KERNEL)),)
+NCU_KERNEL_ARG = -k $(NCU_KERNEL)
+endif
 NCU_ARGS = --set $(NCU_SET) --launch-skip $(NCU_LAUNCH_SKIP) --launch-count $(NCU_LAUNCH_COUNT) \
-	-k $(NCU_KERNEL) --cache-control all
+	$(NCU_KERNEL_ARG) --cache-control all
 # 默认 /usr/local/cuda/bin/nsys 未正确安装；独立安装于 /opt/nvidia/nsight-systems/。
 NSYS ?= /opt/nvidia/nsight-systems/2024.2.3/bin/nsys
 # nsys 无 ncu 式 section set；默认 trace 已含 cuda/nvtx/osrt，但 GUI 需显式开启部分项。
@@ -62,10 +66,10 @@ verify: check
 all: $(BENCH) $(VERIFY_BIN)
 
 $(BENCH): $(UTIL_BENCH) $(KERNEL_SRC) $(UTIL_IO) $(UTIL_DIR)/gemm_launch.h
-	$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ $(UTIL_BENCH) $(KERNEL_SRC) $(UTIL_IO)
+	$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ $(UTIL_BENCH) $(KERNEL_SRC) $(UTIL_IO) $(LDLIBS)
 
 $(VERIFY_BIN): $(UTIL_VERIFY) $(KERNEL_SRC) $(UTIL_IO) $(UTIL_COMPARE) $(UTIL_DIR)/gemm_launch.h
-	$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ $(UTIL_VERIFY) $(KERNEL_SRC) $(UTIL_IO) $(UTIL_COMPARE)
+	$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ $(UTIL_VERIFY) $(KERNEL_SRC) $(UTIL_IO) $(UTIL_COMPARE) $(LDLIBS)
 
 run: $(BENCH)
 ifndef N
